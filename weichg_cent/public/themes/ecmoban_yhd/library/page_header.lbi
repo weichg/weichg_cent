@@ -1,0 +1,120 @@
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="themes/ecmoban_moonbasa2013/qq/images/qq.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript">
+var process_request = "{$lang.process_request}";
+</script>
+
+<!--顶部导航-->
+<script type="text/javascript">
+          //初始化主菜单
+            function sw_nav(obj,tag)
+            {
+     
+            var DisSub = document.getElementById("DisSub_"+obj);
+            var HandleLI= document.getElementById("HandleLI_"+obj);
+                if(tag==1)
+                {
+                    DisSub.style.display = "block";
+             
+                    
+                }
+                else
+                {
+                    DisSub.style.display = "none";
+                
+                }
+     
+            }
+     
+    </script>
+
+{insert_scripts files='transport.js,utils.js'} 
+<!-- 顶部灰色 start -->
+<div id="global_top_bar" class=" hd_global_top_bar ">
+  <div class="wrap clearfix">
+    <div class=" hd_topbar_left clearfix "  id="ECS_MEMBERZONE"> {* ECSHOP 提醒您：根据用户id来调用member_info.lbi显示不同的界面  *}{insert name='member_info'} </div>
+    <div class="hd_top_manu clearfix">
+      <ul class="clearfix">
+        <li class="hd_my_order"> <a href="user.php?act=order_list" target="_blank"><s></s>我的订单</a> </li>
+        <!--{if $navigator_list.top}--> 
+        <!-- {foreach name=nav_top_list from=$navigator_list.top item=nav} --> 
+        <li class="hd_menu_tit" 
+        
+        
+        
+        
+        
+        <!-- {if $smarty.foreach.nav_top_list.last} --> 
+        style="background:none;" 
+        <!-- {/if} --> 
+        > <a href="{$nav.url}" 
+        
+        
+        
+        
+        
+        <!-- {if $nav.opennew eq 1} --> 
+        target="_blank" 
+        <!-- {/if} --> 
+        >{$nav.name}</a>
+        </li>
+        <!-- {/foreach} --> 
+        <!-- {/if} -->
+      </ul>
+      <a title="加入收藏" class="favorite" href="javascript:bookmark();">加入收藏</a> <a title="关注{$shop_name}新浪微博" class="sina_weibo" href="http://weibo.com/yihaodian" id="weibo" target="_blank">关注{$shop_name}新浪微博</a> </div>
+  </div>
+</div>
+<!-- 顶部灰色导航 end --> 
+
+<!-- 顶部LOGO搜索 start -->
+<div id="site_header" class="wrap clearfix">
+  <div id="logo_areaID" class="hd_logo_area fl clearfix"> <a href="index.php" class="fl"> <img src="images/logo.png"> </a> </div>
+  <script type="text/javascript">
+    {literal}
+    <!--
+    function checkSearchForm()
+    {
+        if(document.getElementById('keyword').value)
+        {
+            return true;
+        }
+        else
+        {
+            alert("{$lang.no_keywords}");
+            return false;
+        }
+    }
+    -->
+    {/literal}
+    </script>
+  <div class="hd_head_search">
+    <div class="hd_search_form clearfix">
+      <div class="hd_search_wrap clearfix">
+        <form name="searchForm" method="get" action="search.php" onSubmit="return checkSearchForm()" >
+          <input type="text" maxlength="100" style="color:#333333;" name="keywords" id="keyword" class="hd_input_test"  value="{$search_keywords|escape}" >
+          <!--搜索提示 begin-->
+          <input class="hd_search_btn" type="submit" style="width:98px" value="搜 索" >
+          </input>
+        </form>
+      </div>
+    </div>
+    <p id="hotKeywordsShow" class="hd_hot_search"> {if $searchkeywords} <span>{$lang.hot_search} ：</span> {foreach from=$searchkeywords item=val} <a href="search.php?keywords={$val|escape:url}">{$val}</a> {/foreach}
+      {/if} </p>
+  </div>
+</div>
+<!-- 顶部LOGO搜索 end -->
+<div style="height:10px;"></div>
+<div class="menu_box clearfix">
+  <div class="block" style="position:relative;">
+    <div class="menu"> <a href="../index.php"{if $navigator_list.config.index eq 1} class="cur"{/if}>{$lang.home}<span></span></a> 
+      <!-- {foreach name=nav_middle_list from=$navigator_list.middle item=nav} --> 
+      <a href="{$nav.url}" {if $nav.opennew eq 1}target="_blank" {/if} {if $nav.active eq 1} class="cur"{/if}> {$nav.name} <span></span> </a> 
+      
+      <!-- {/foreach} -->
+      
+      <div class="mini_cart clearfix">
+        <div class="minicart_box"><a href="./flow.php" class="mini_cart_btn">购物车<span class="cart_num" id="ECS_CARTINFO">{insert name='cart_info'}</span></a> </div>
+      </div>
+    </div>
+  </div>
+</div>

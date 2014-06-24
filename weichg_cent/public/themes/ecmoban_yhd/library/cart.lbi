@@ -1,0 +1,4 @@
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+{insert_scripts files='transport.js'}
+<span class="cart_num" id="ECS_CARTINFO">{insert name='cart_info'}</span>
+
