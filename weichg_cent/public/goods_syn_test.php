@@ -56,11 +56,12 @@ if($_REQUEST['act'] == 'goods_syn') {
 			$zip->add_file(file_get_contents(ROOT_PATH . $row['original_img']), $row['original_img']);
 		}
 		
+		//同步商品数据
 		$row['original_img'] = "data/wchgImg/" . $row['original_img'];
 		if ($db_city->getOne($sql)) {
-			$sql = "UPDATE weic_product SET model='{$row['goods_sn']}',cost={$row['shop_price']},image='{$row['original_img']}',date_modified=Now() WHERE product_id=" . $goodsId;
+			$sql = "UPDATE weic_product SET model='{$row['goods_sn']}',cost={$row['shop_price']},stock_status_id=5,image='{$row['original_img']}',manufacturer_id={$row['brand_id']},date_modified=Now() WHERE product_id=" . $goodsId;
 		} else {
-			$sql = "INSERT INTO weic_product(product_id,model,image,cost,date_added,date_modified) VALUES({$row['goods_id']},'{$row['goods_sn']}','{$row['original_img']}',{$row['shop_price']},Now(),Now())";
+			$sql = "INSERT INTO weic_product(product_id,model,stock_status_id,image,manufacturer_id,cost,date_added,date_modified) VALUES({$row['goods_id']},'{$row['goods_sn']}',5,'{$row['original_img']}',{$row['brand_id']},{$row['shop_price']},Now(),Now())";
 		}
 		$db_city->query($sql);
 		
@@ -72,8 +73,57 @@ if($_REQUEST['act'] == 'goods_syn') {
 		}
 		$db_city->query($sql);
 		
+		//同步商品分类
+		$catId = $row['cat_id'];
+		while ($catId) {
+			$sql = "SELECT * FROM weic_category WHERE cat_id=" . $catId;
+			$cat = $db->fetchRow($db->query($sql));
+			
+			$sql = "SELECT * FROM weic_category WHERE category_id=" . $catId;
+			if ($db_city->getOne($sql)) {
+				$sql = "UPDATE weic_category SET parent_id={$cat['parent_id']},sort_order={$cat['sort_order']},status=1,date_modified=Now() WHERE category_id=" . $catId;
+			} else {
+				$sql = "INSERT INTO weic_category VALUES({$cat['cat_id']},'',{$cat['parent_id']},0,0,{$cat['sort_order']},1,Now(),Now())";
+			}
+			
+			$db_city->query($sql);
+			
+			$sql = "SELECT * FROM weic_category_description WHERE category_id=" . $catId;
+			if ($db_city->getOne($sql)) {
+				$sql = "UPDATE weic_category_description SET language_id=2,name='{$cat['cat_name']}',description='{$cat['cat_desc']}',meta_keyword='{$cat['keywords']}' WHERE category_id=" . $catId;
+			} else {
+				$sql = "INSERT INTO weic_category_description VALUES({$cat['cat_id']},2,'{$cat['cat_name']}','{$cat['cat_desc']}','','{$cat['keywords']}')";
+			}
+				
+			$db_city->query($sql);
+			$catId = $cat['parent_id'];
+		}
+		$sql = "SELECT * FROM weic_product_to_category WHERE category_id={$row['cat_id']} AND product_id=" . $goodsId;
+		if (!$db_city->getOne($sql)) {
+			$sql = "INSERT INTO weic_product_to_category VALUES($goodsId,{$row['cat_id']})";
+		}
+		$db_city->query($sql);
 		
+		//同步商品品牌数据
+		$brandId = $row['brand_id'];
+		$sql = "SELECT * FROM weic_brand WHERE brand_id=" . $brandId;
+		$brand = $db->fetchRow($db->query($sql));
 		
+		$sql = "SELECT * FROM weic_manufacturer WHERE manufacturer_id=" . $brandId;
+		if ($db_city->getOne($sql)) {
+			$sql = "UPDATE weic_manufacturer SET name='{$brand['brand_name']}', image='{$brand['brand_logo']}', sort_order={$brand['sort_order']} WHERE manufacturer_id=" . $brandId;
+		} else {
+			$sql = "INSERT INTO weic_manufacturer VALUES({$brand['brand_id']},'{$brand['brand_name']}','{$brand['brand_logo']}',{$brand['sort_order']})";
+		}
+		$db_city->query($sql);
+		
+		$sql = "SELECT * FROM weic_manufacturer_to_store WHERE store_id=0 AND manufacturer_id=" . $brandId;
+		if (!$db_city->getOne($sql)) {
+			$sql = "INSERT INTO weic_manufacturer_to_store VALUES({$brand['brand_id']},0)";
+		}
+		$db_city->query($sql);
+
+		//同步商品图片
 		$db_city->query("DELETE FROM weic_product_image WHERE product_id=" . $goodsId);
 		$sql = "SELECT * FROM weic_goods_gallery WHERE goods_id=" . $goodsId;
 		$res = $db->query($sql);
