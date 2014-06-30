@@ -154,7 +154,7 @@ if($_REQUEST['act'] == 'goods_syn') {
 		fwrite($fp, $out, strlen($out));
 		fclose($fp);
 		
-		if (!intval(file_get_contents("http://localhost:8080/synchro/customer/customers/page?userId=$userId&shop_ip=$shop_ip"))) {
+		/*if (!intval(file_get_contents("http://localhost:8080/synchro/customer/customers/page?userId=$userId&shop_ip=$shop_ip"))) {
 			$result['error'] = 0;
 			$result['message'] = '同步成功！';
 			die($json->encode($result));
@@ -162,7 +162,7 @@ if($_REQUEST['act'] == 'goods_syn') {
 			$result['error'] = 2;
 			$result['message'] = '同步失败，请重试！';
 			die($json->encode($result));
-		}
+		}*/
 		
 	}
 	catch (Exception $e) {
