@@ -96,8 +96,16 @@ if($_REQUEST['act'] == 'goods_syn') {
 			}
 				
 			$db_city->query($sql);
+			
+			$sql = "SELECT * FROM weic_category_to_store WHERE store_id=0 AND category_id=" . $catId;
+			if (!$db_city->getOne($sql)) {
+				$sql = "INSERT INTO weic_category_to_store VALUES($catId, 0)";
+			}
+			$db_city->query($sql);
+			
 			$catId = $cat['parent_id'];
 		}
+		
 		$sql = "SELECT * FROM weic_product_to_category WHERE category_id={$row['cat_id']} AND product_id=" . $goodsId;
 		if (!$db_city->getOne($sql)) {
 			$sql = "INSERT INTO weic_product_to_category VALUES($goodsId,{$row['cat_id']})";
