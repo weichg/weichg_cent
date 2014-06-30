@@ -48,9 +48,9 @@ if($_REQUEST['act'] == 'goods_syn') {
 
 		$sql = "SELECT * FROM weic_product WHERE product_id = " . $goodsId;
 		
+		//打包压缩图片
 		include_once('includes/cls_phpzip.php');
 		$zip = new PHPZip;
-		//压缩图片
 		if (!empty($row['original_img']) && is_file(ROOT_PATH . $row['original_img']))
 		{
 			$zip->add_file(file_get_contents(ROOT_PATH . $row['original_img']), $row['original_img']);
