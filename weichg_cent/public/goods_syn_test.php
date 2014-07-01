@@ -73,6 +73,12 @@ if($_REQUEST['act'] == 'goods_syn') {
 		}
 		$db_city->query($sql);
 		
+		$sql = "SELECT * FROM weic_product_to_store WHERE store_id=0 AND product_id=" . $goodsId;
+		if (!$db_city->getOne($sql)) {
+			$sql = "INSERT INTO weic_product_to_store VALUES($goodsId, 0)";
+		}
+		$db_city->query($sql);
+		
 		//同步商品分类
 		$catId = $row['cat_id'];
 		while ($catId) {
@@ -83,10 +89,22 @@ if($_REQUEST['act'] == 'goods_syn') {
 			if ($db_city->getOne($sql)) {
 				$sql = "UPDATE weic_category SET parent_id={$cat['parent_id']},sort_order={$cat['sort_order']},status=1,date_modified=Now() WHERE category_id=" . $catId;
 			} else {
-				$sql = "INSERT INTO weic_category VALUES({$cat['cat_id']},'',{$cat['parent_id']},1,1,{$cat['sort_order']},1,Now(),Now())";
+				if ($cat['parent_id'] == 0) {
+					$sql = "INSERT INTO weic_category VALUES({$cat['cat_id']},'',{$cat['parent_id']},1,1,{$cat['sort_order']},1,Now(),Now())";
+				} else {
+					$sql = "INSERT INTO weic_category VALUES({$cat['cat_id']},'',{$cat['parent_id']},0,1,{$cat['sort_order']},1,Now(),Now())";
+				}
 			}
 			
 			$db_city->query($sql);
+
+			if ($cat['parent_id'] == 0) {
+				$sql = "SELECT * FROM weic_category_to_layout WHERE category_id=" . $catId;
+				if (!$db_city->getOne($sql)) {
+					$sql = "INSERT INTO weic_category_to_layout VALUES($catId, 0, 1)";
+				}
+				$db_city->query($sql);
+			}
 			
 			$sql = "SELECT * FROM weic_category_description WHERE category_id=" . $catId;
 			if ($db_city->getOne($sql)) {
