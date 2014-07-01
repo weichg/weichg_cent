@@ -83,7 +83,7 @@ if($_REQUEST['act'] == 'goods_syn') {
 			if ($db_city->getOne($sql)) {
 				$sql = "UPDATE weic_category SET parent_id={$cat['parent_id']},sort_order={$cat['sort_order']},status=1,date_modified=Now() WHERE category_id=" . $catId;
 			} else {
-				$sql = "INSERT INTO weic_category VALUES({$cat['cat_id']},'',{$cat['parent_id']},0,0,{$cat['sort_order']},1,Now(),Now())";
+				$sql = "INSERT INTO weic_category VALUES({$cat['cat_id']},'',{$cat['parent_id']},1,1,{$cat['sort_order']},1,Now(),Now())";
 			}
 			
 			$db_city->query($sql);
