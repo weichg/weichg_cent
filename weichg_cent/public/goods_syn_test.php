@@ -172,6 +172,18 @@ if($_REQUEST['act'] == 'goods_syn') {
 		fwrite($fp, $out, strlen($out));
 		fclose($fp);
 		
+		$zip = realpath($zipPath . $zipFileName);
+		$fields['zip'] = '@' . $zip;
+		
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL,"http://$shop_ip/index.php?route=product/product_syn");
+		curl_setopt($ch, CURLOPT_POST, 1 );
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		
+		$result = curl_exec($ch);
+		curl_close($ch);
+		echo $result;
 		/*if (!intval(file_get_contents("http://localhost:8080/synchro/customer/customers/page?userId=$userId&shop_ip=$shop_ip"))) {
 			$result['error'] = 0;
 			$result['message'] = '同步成功！';
