@@ -35,7 +35,7 @@ if($_REQUEST['act'] == 'goods_syn') {
 	try {
 		//获得子商城数据库IP
 		$sql = "SELECT shop_ip FROM " . $ecs->table('users') . " WHERE user_id=" . $_SESSION['user_id'];
-		$shop = $db->getOne($sql);
+		$shop_ip = $db->getOne($sql);
 
 		//获得商品信息
 		$sql = "SELECT * FROM weic_goods WHERE goods_id = " . $goodsId;
@@ -44,19 +44,31 @@ if($_REQUEST['act'] == 'goods_syn') {
 		//同步商品信息到子商城
 		$goods = array();
 		$goods['goods_id'] = $goodsId;
+		$goods['goods_sn'] = $row['goods_sn'];
 		$goods['goods_name'] = str_replace("'", "\'", $row['goods_name']);
 		$goods['goods_desc'] = str_replace("'", "\'", $row['goods_desc']);
-		$goods['brand_id'] = $row['brand_id'];
-		$goods['cat_id'][] = array();
+		$goods['goods_keywords'] = $row['keywords'];
+		$goods['goods_original_img'] = $row['original_img'];
+		$goods['goods_shop_price'] = $row['shop_price'];
+		$goods['goods_cat'] = array();
+		$goods['goods_images'] = array();
 		
 		$catId = $row['cat_id'];
 		while ($catId) {
-			$sql = "SELECT * FROM weic_category WHERE cat_id=" . $catId;
+			$sql = "SELECT cat_id,cat_name,keywords,cat_desc,parent_id FROM weic_category WHERE cat_id=" . $catId;
 			$cat = $db->fetchRow($db->query($sql));
-		
+			$r = array();
+			foreach ($cat as $key=>$value) {
+				$r[$key] = $value;
+			}
+			$goods['goods_cat'][] = $r;
 			$catId = $cat['parent_id'];
 		}
 		
+		$sql = "SELECT brand_id,brand_name FROM weic_brand WHERE brand_id=" . $row['brand_id'];
+		$brands = $db->fetchRow($db->query($sql));
+		$goods['goods_brand_id'] = $brands['brand_id'];
+		$goods['goods_brand_name'] = $brands['brand_name'];
 		
 		//打包压缩图片
 		include_once('includes/cls_phpzip.php');
@@ -67,13 +79,18 @@ if($_REQUEST['act'] == 'goods_syn') {
 		}
 		
 		//同步商品图片
-		$sql = "SELECT * FROM weic_goods_gallery WHERE goods_id=" . $goodsId;
+		$sql = "SELECT goods_id,img_original FROM weic_goods_gallery WHERE goods_id=" . $goodsId;
 		$res = $db->query($sql);
 		while ($g = $db->fetchRow($res)) {
 			if (!empty($g['img_original']) && is_file(ROOT_PATH . $g['img_original']))
 			{
 				$zip->add_file(file_get_contents(ROOT_PATH . $g['img_original']), $g['img_original']);
 			}
+			$img = array();
+			foreach ($g as $key=>$value) {
+				$img[$key] = $value;
+			}
+			$goods['goods_images'][] = $img;
 		}
 		
 		$zipPath = 'temp/goods_syn/' . $userId . '/';
@@ -89,6 +106,7 @@ if($_REQUEST['act'] == 'goods_syn') {
 		$fields['zip'] = '@' . $zipFile;
 		$fields['checkSn'] = md5("10.162.48.225" . $shop_ip);
 		$fields['directory'] = "wchgImg";
+		$fields['data'] = $json->encode($goods);
 		
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL,"http://$shop_ip/index.php?route=product/product_syn");
