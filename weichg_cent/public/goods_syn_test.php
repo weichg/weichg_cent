@@ -42,13 +42,14 @@ if($_REQUEST['act'] == 'goods_syn') {
 		$row = $db->fetchRow($db->query($sql));
 
 		//同步商品信息到子商城
+		$goods_img_directory = "data/wchgImg/";
 		$goods = array();
 		$goods['goods_id'] = $goodsId;
 		$goods['goods_sn'] = $row['goods_sn'];
 		$goods['goods_name'] = $row['goods_name'];
 		$goods['goods_desc'] = $row['goods_desc'];
 		$goods['goods_keywords'] = $row['keywords'];
-		$goods['goods_original_img'] = $row['original_img'];
+		$goods['goods_original_img'] = $goods_img_directory . $row['original_img'];
 		$goods['goods_shop_price'] = $row['shop_price'];
 		$goods['goods_cat'] = array();
 		$goods['goods_images'] = array();
@@ -65,10 +66,11 @@ if($_REQUEST['act'] == 'goods_syn') {
 			$catId = $cat['parent_id'];
 		}
 		
-		$sql = "SELECT brand_id,brand_name FROM weic_brand WHERE brand_id=" . $row['brand_id'];
+		$sql = "SELECT brand_id,brand_name,brand_logo FROM weic_brand WHERE brand_id=" . $row['brand_id'];
 		$brands = $db->fetchRow($db->query($sql));
 		$goods['goods_brand_id'] = $brands['brand_id'];
 		$goods['goods_brand_name'] = $brands['brand_name'];
+		$goods['goods_brand_logo'] = $goods_img_directory . $brands['brand_logo'];
 		
 		//打包压缩图片
 		include_once('includes/cls_phpzip.php');
@@ -87,12 +89,12 @@ if($_REQUEST['act'] == 'goods_syn') {
 				$zip->add_file(file_get_contents(ROOT_PATH . $g['img_original']), $g['img_original']);
 			}
 			$img = array();
-			foreach ($g as $key=>$value) {
-				$img[$key] = $value;
-			}
+			$img['goods_id'] = $g['goods_id'];
+			$img['img_original']= $goods_img_directory . $g['img_original'];
 			$goods['goods_images'][] = $img;
 		}
 		
+		//生成本地图片压缩包
 		$zipPath = 'temp/goods_syn/' . $userId . '/';
 		$zipFileName = time() . '.zip';
 		mkdir($zipPath);
@@ -102,10 +104,11 @@ if($_REQUEST['act'] == 'goods_syn') {
 		fwrite($fp, $out, strlen($out));
 		fclose($fp);
 		
+		//POST同步信息给子商城
 		$zipFile = realpath($zipPath . $zipFileName);
 		$fields['zip'] = '@' . $zipFile;
 		$fields['checkSn'] = md5("10.162.48.225" . $shop_ip);
-		$fields['directory'] = "wchgImg";
+		$fields['directory'] = $goods_img_directory;
 		$fields['data'] = urlencode($json->encode($goods));
 		
 		$ch = curl_init();
