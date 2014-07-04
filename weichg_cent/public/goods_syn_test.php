@@ -45,8 +45,8 @@ if($_REQUEST['act'] == 'goods_syn') {
 		$goods = array();
 		$goods['goods_id'] = $goodsId;
 		$goods['goods_sn'] = $row['goods_sn'];
-		$goods['goods_name'] = str_replace("'", "\'", $row['goods_name']);
-		$goods['goods_desc'] = str_replace("'", "\'", $row['goods_desc']);
+		$goods['goods_name'] = $row['goods_name'];
+		$goods['goods_desc'] = $row['goods_desc'];
 		$goods['goods_keywords'] = $row['keywords'];
 		$goods['goods_original_img'] = $row['original_img'];
 		$goods['goods_shop_price'] = $row['shop_price'];
@@ -106,7 +106,7 @@ if($_REQUEST['act'] == 'goods_syn') {
 		$fields['zip'] = '@' . $zipFile;
 		$fields['checkSn'] = md5("10.162.48.225" . $shop_ip);
 		$fields['directory'] = "wchgImg";
-		$fields['data'] = $json->encode($goods);
+		$fields['data'] = urlencode($json->encode($goods));
 		
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL,"http://$shop_ip/index.php?route=product/product_syn");
