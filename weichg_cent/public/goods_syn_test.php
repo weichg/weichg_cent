@@ -46,9 +46,9 @@ if($_REQUEST['act'] == 'goods_syn') {
 		$goods = array();
 		$goods['goods_id'] = $goodsId;
 		$goods['goods_sn'] = $row['goods_sn'];
-		$goods['goods_name'] = $row['goods_name'];
-		$goods['goods_desc'] = $row['goods_desc'];
-		$goods['goods_keywords'] = $row['keywords'];
+		$goods['goods_name'] = str_replace("'", "\'", $row['goods_name']);
+		$goods['goods_desc'] = str_replace("'", "\'", $row['goods_desc']);
+		$goods['goods_keywords'] = str_replace("'", "\'", $row['keywords']);
 		$goods['goods_original_img'] = $goods_img_directory . $row['original_img'];
 		$goods['goods_shop_price'] = $row['shop_price'];
 		$goods['goods_cat'] = array();
@@ -60,7 +60,7 @@ if($_REQUEST['act'] == 'goods_syn') {
 			$cat = $db->fetchRow($db->query($sql));
 			$r = array();
 			foreach ($cat as $key=>$value) {
-				$r[$key] = $value;
+				$r[$key] = str_replace("'", "\'", $value);
 			}
 			$goods['goods_cat'][] = $r;
 			$catId = $cat['parent_id'];
@@ -69,8 +69,8 @@ if($_REQUEST['act'] == 'goods_syn') {
 		$sql = "SELECT brand_id,brand_name,brand_logo FROM weic_brand WHERE brand_id=" . $row['brand_id'];
 		$brands = $db->fetchRow($db->query($sql));
 		$goods['goods_brand_id'] = $brands['brand_id'];
-		$goods['goods_brand_name'] = $brands['brand_name'];
-		$goods['goods_brand_logo'] = $goods_img_directory . $brands['brand_logo'];
+		$goods['goods_brand_name'] = str_replace("'", "\'", $brands['brand_name']);
+		$goods['goods_brand_logo'] = empty($brands['brand_logo']) ? $brands['brand_logo'] : $goods_img_directory . $brands['brand_logo'];
 		
 		//打包压缩图片
 		include_once('includes/cls_phpzip.php');
@@ -90,7 +90,7 @@ if($_REQUEST['act'] == 'goods_syn') {
 			}
 			$img = array();
 			$img['goods_id'] = $g['goods_id'];
-			$img['img_original']= $goods_img_directory . $g['img_original'];
+			$img['img_original'] = empty($g['img_original']) ? $g['img_original'] : $goods_img_directory . $g['img_original'];
 			$goods['goods_images'][] = $img;
 		}
 		
