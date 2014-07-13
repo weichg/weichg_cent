@@ -44,17 +44,17 @@ if($_REQUEST['act'] == 'goods_syn') {
 		//同步商品信息到子商城
 		$goods_img_directory = "data/wchgImg/";
 		$goods = array();
-		$goods['goods_id'] = $goodsId;
+		//$goods['goods_id'] = $goodsId;
 		$goods['goods_sn'] = $row['goods_sn'];
 		$goods['goods_name'] = $row['goods_name'];
 		$goods['goods_desc'] = $row['goods_desc'];
 		$goods['goods_keywords'] = $row['keywords'];
 		$goods['goods_original_img'] = $goods_img_directory . $row['original_img'];
 		$goods['goods_shop_price'] = $row['shop_price'];
-		$goods['goods_cat'] = array();
+		//$goods['goods_cat'] = array();
 		$goods['goods_images'] = array();
 		
-		$catId = $row['cat_id'];
+		/*$catId = $row['cat_id'];
 		while ($catId) {
 			$sql = "SELECT cat_id,cat_name,keywords,cat_desc,parent_id FROM weic_category WHERE cat_id=" . $catId;
 			$cat = $db->fetchRow($db->query($sql));
@@ -64,7 +64,7 @@ if($_REQUEST['act'] == 'goods_syn') {
 			}
 			$goods['goods_cat'][] = $r;
 			$catId = $cat['parent_id'];
-		}
+		}*/
 		
 		$sql = "SELECT brand_id,brand_name,brand_logo FROM weic_brand WHERE brand_id=" . $row['brand_id'];
 		$brands = $db->fetchRow($db->query($sql));
