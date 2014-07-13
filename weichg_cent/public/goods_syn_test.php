@@ -89,7 +89,7 @@ if($_REQUEST['act'] == 'goods_syn') {
 				$zip->add_file(file_get_contents(ROOT_PATH . $g['img_original']), $g['img_original']);
 			}
 			$img = array();
-			$img['goods_id'] = $g['goods_id'];
+			//$img['goods_id'] = $g['goods_id'];
 			$img['img_original'] = empty($g['img_original']) ? $g['img_original'] : $goods_img_directory . $g['img_original'];
 			$goods['goods_images'][] = $img;
 		}
