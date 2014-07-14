@@ -46,7 +46,7 @@ if($_REQUEST['act'] == 'goods_syn') {
 		$goods = array();
 		//$goods['goods_id'] = $goodsId;
 		$goods['goods_sn'] = $row['goods_sn'];
-		$goods['goods_name'] = $row['goods_name'];
+		$goods['goods_name'] = trim($row['goods_name']);
 		$goods['goods_desc'] = $row['goods_desc'];
 		$goods['goods_keywords'] = $row['keywords'];
 		$goods['goods_original_img'] = $goods_img_directory . $row['original_img'];
