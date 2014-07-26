@@ -36,107 +36,65 @@ if($_REQUEST['act'] == 'goods_syn') {
 		//获得子商城数据库IP
 		$sql = "SELECT shop_ip FROM " . $ecs->table('users') . " WHERE user_id=" . $_SESSION['user_id'];
 		$shop_ip = $db->getOne($sql);
-		$db_city = new cls_mysql($shop_ip, 'weichg', 'Weichg_Syn@weichg.com', 'weichg_city');
 
 		//获得商品信息
 		$sql = "SELECT * FROM weic_goods WHERE goods_id = " . $goodsId;
 		$row = $db->fetchRow($db->query($sql));
 
 		//同步商品信息到子商城
-		$row['goods_name'] = str_replace("'", "\'", $row['goods_name']);
-		$row['goods_brief'] = str_replace("'", "\'", $row['goods_brief']);
-		$row['goods_desc'] = str_replace("'", "\'", $row['goods_desc']);
-
-		if ($db_city->getOne($sql)) {
-			$sql = "UPDATE weic_goods SET cat_id={$row['cat_id']},goods_sn='{$row['goods_sn']}',goods_name='{$row['goods_name']}',"
-					. "goods_name_style='{$row['goods_name_style']}',brand_id={$row['brand_id']},provider_name='{$row['provider_name']}',goods_weight={$row['goods_weight']},purchase_price={$row['shop_price']},market_price={$row['market_price']},"
-					. "keywords='{$row['keywords']}',goods_brief='{$row['goods_brief']}',goods_desc='{$row['goods_desc']}',goods_thumb='{$row['goods_thumb']}',goods_img='{$row['goods_img']}',original_img='{$row['original_img']}',"
-					. "add_time={$row['add_time']},last_update={$row['last_update']},is_delete=0 WHERE goods_id=" . $goodsId;
-			
-		} else {
-			$sql = "INSERT INTO weic_goods(goods_id,cat_id,goods_sn,goods_name,"
-					. "goods_name_style,brand_id,provider_name,goods_weight,purchase_price,market_price,"
-					. "keywords,goods_brief,goods_desc,goods_thumb,goods_img,original_img,"
-					. "add_time,last_update) VALUES({$row['goods_id']},{$row['cat_id']},'{$row['goods_sn']}','{$row['goods_name']}',"
-					. "'{$row['goods_name_style']}',{$row['brand_id']},'{$row['provider_name']}',{$row['goods_weight']},{$row['shop_price']},"
-	                . "{$row['market_price']},'{$row['keywords']}','{$row['goods_brief']}','{$row['goods_desc']}',"
-	                . "'{$row['goods_thumb']}','{$row['goods_img']}','{$row['original_img']}',{$row['add_time']},{$row['last_update']})";
-		}
-		$db_city->query($sql);
+		$goods_img_directory = "data/wchgImg/";
+		$goods = array();
+		//$goods['goods_id'] = $goodsId;
+		$goods['goods_sn'] = $row['goods_sn'];
+		$goods['goods_name'] = trim($row['goods_name']);
+		$goods['goods_desc'] = $row['goods_desc'];
+		$goods['goods_keywords'] = $row['keywords'];
+		$goods['goods_original_img'] = $goods_img_directory . $row['original_img'];
+		$goods['goods_shop_price'] = $row['shop_price'];
+		//$goods['goods_cat'] = array();
+		$goods['goods_images'] = array();
 		
-		$catId = $row['cat_id'];
+		/*$catId = $row['cat_id'];
 		while ($catId) {
-			$sql = "SELECT * FROM weic_category WHERE cat_id=" . $catId;
-		    $cat = $db->fetchRow($db->query($sql));
-			if ($db_city->getOne($sql)) {
-				$sql = "UPDATE weic_category SET cat_id={$cat['cat_id']},cat_name='{$cat['cat_name']}',"
-						. "keywords='{$cat['keywords']}',cat_desc='{$cat['cat_desc']}',parent_id={$cat['parent_id']},"
-						. "sort_order={$cat['sort_order']},template_file='{$cat['template_file']}',measure_unit='{$cat['measure_unit']}',"
-						. "show_in_nav={$cat['show_in_nav']},style='{$cat['style']}',is_show={$cat['is_show']},"
-				        . "grade={$cat['grade']},filter_attr='{$cat['filter_attr']}' WHERE cat_id=" . $catId;
-			} else {
-				$sql = "INSERT INTO weic_category VALUES({$cat['cat_id']},'{$cat['cat_name']}','{$cat['keywords']}',"
-						. "'{$cat['cat_desc']}',{$cat['parent_id']},{$cat['sort_order']},'{$cat['template_file']}',"
-						. "'{$cat['measure_unit']}',{$cat['show_in_nav']},'{$cat['style']}',{$cat['is_show']},{$cat['grade']},"
-						. "'{$cat['filter_attr']}')";
+			$sql = "SELECT cat_id,cat_name,keywords,cat_desc,parent_id FROM weic_category WHERE cat_id=" . $catId;
+			$cat = $db->fetchRow($db->query($sql));
+			$r = array();
+			foreach ($cat as $key=>$value) {
+				$r[$key] = $value;
 			}
-			$db_city->query($sql);
+			$goods['goods_cat'][] = $r;
 			$catId = $cat['parent_id'];
-		}
+		}*/
 		
-		$brandId = $row['brand_id'];
-		$sql = "SELECT * FROM weic_brand WHERE brand_id=" . $brandId;
-		$brand = $db->fetchRow($db->query($sql));
-		if ($db_city->getOne($sql)) {
-			$sql = "UPDATE weic_brand SET brand_id={$brand['brand_id']},brand_name='{$brand['brand_name']}',"
-					. "brand_logo='{$brand['brand_logo']}',brand_desc='{$brand['brand_desc']}',"
-					. "site_url='{$brand['site_url']}',sort_order={$brand['sort_order']},"
-					. "is_show={$brand['is_show']} WHERE brand_id=" . $brandId;
-		} else {
-			$sql = "INSERT INTO weic_brand VALUES({$brand['brand_id']},'{$brand['brand_name']}',"
-					. "'{$brand['brand_logo']}','{$brand['brand_desc']}','{$brand['site_url']}',"
-					. "{$brand['sort_order']},{$brand['is_show']})";
-		}
-		$db_city->query($sql);
+		$sql = "SELECT brand_id,brand_name,brand_logo FROM weic_brand WHERE brand_id=" . $row['brand_id'];
+		$brands = $db->fetchRow($db->query($sql));
+		$goods['goods_brand_id'] = $brands['brand_id'];
+		$goods['goods_brand_name'] = $brands['brand_name'];
+		$goods['goods_brand_logo'] = empty($brands['brand_logo']) ? $brands['brand_logo'] : $goods_img_directory . $brands['brand_logo'];
 		
+		//打包压缩图片
 		include_once('includes/cls_phpzip.php');
 		$zip = new PHPZip;
-		//压缩图片
-		if (!empty($row['goods_img']) && is_file(ROOT_PATH . $row['goods_img']))
-		{
-			$zip->add_file(file_get_contents(ROOT_PATH . $row['goods_img']), $row['goods_img']);
-		}
 		if (!empty($row['original_img']) && is_file(ROOT_PATH . $row['original_img']))
 		{
 			$zip->add_file(file_get_contents(ROOT_PATH . $row['original_img']), $row['original_img']);
 		}
-		if (!empty($row['goods_thumb']) && is_file(ROOT_PATH . $row['goods_thumb']))
-		{
-			$zip->add_file(file_get_contents(ROOT_PATH . $row['goods_thumb']), $row['goods_thumb']);
-		}
 		
-		$db_city->query("DELETE FROM weic_goods_gallery WHERE goods_id=" . $goodsId);
-		$sql = "SELECT * FROM weic_goods_gallery WHERE goods_id=" . $goodsId;
+		//同步商品图片
+		$sql = "SELECT goods_id,img_original FROM weic_goods_gallery WHERE goods_id=" . $goodsId;
 		$res = $db->query($sql);
 		while ($g = $db->fetchRow($res)) {
-			
-			$sql = "INSERT INTO weic_goods_gallery VALUES({$g['img_id']},{$g['goods_id']},'{$g['img_url']}','{$g['img_desc']}','{$g['thumb_url']}','{$g['img_original']}')";
-			$db_city->query($sql);
-			
-			if (!empty($g['img_url']) && is_file(ROOT_PATH . $g['img_url']))
-			{
-				$zip->add_file(file_get_contents(ROOT_PATH . $g['img_url']), $g['img_url']);
-			}
-			if (!empty($g['thumb_url']) && is_file(ROOT_PATH . $g['thumb_url']))
-			{
-				$zip->add_file(file_get_contents(ROOT_PATH . $g['thumb_url']), $g['thumb_url']);
-			}
 			if (!empty($g['img_original']) && is_file(ROOT_PATH . $g['img_original']))
 			{
 				$zip->add_file(file_get_contents(ROOT_PATH . $g['img_original']), $g['img_original']);
 			}
+			$img = array();
+			//$img['goods_id'] = $g['goods_id'];
+			$img['img_original'] = empty($g['img_original']) ? $g['img_original'] : $goods_img_directory . $g['img_original'];
+			$goods['goods_images'][] = $img;
 		}
 		
+		//生成本地图片压缩包
 		$zipPath = 'temp/goods_syn/' . $userId . '/';
 		$zipFileName = time() . '.zip';
 		mkdir($zipPath);
@@ -145,16 +103,27 @@ if($_REQUEST['act'] == 'goods_syn') {
 		$fp = fopen($zipPath . $zipFileName, 'wb');
 		fwrite($fp, $out, strlen($out));
 		fclose($fp);
+
+		//POST同步信息给子商城
+		$zipFile = realpath($zipPath . $zipFileName);
+		$fields['zip'] = '@' . $zipFile;
+		$fields['checkSn'] = md5("10.162.48.225" . $shop_ip);
+		$fields['directory'] = $goods_img_directory;
+		$fields['data'] = urlencode($json->encode($goods));
 		
-		if (!intval(file_get_contents("http://localhost:8080/synchro/customer/customers/page?userId=$userId&shop_ip=$shop_ip"))) {
-			$result['error'] = 0;
-			$result['message'] = '同步成功！';
-			die($json->encode($result));
-		} else {
-			$result['error'] = 2;
-			$result['message'] = '同步失败，请重试！';
-			die($json->encode($result));
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL,"http://$shop_ip/index.php?route=product/product_syn");
+		curl_setopt($ch, CURLOPT_POST, 1 );
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		
+		$result = curl_exec($ch);
+		curl_close($ch);
+		
+		if (file_exists($zipFile)) {
+			@unlink($zipFile);
 		}
+		die($result);
 		
 	}
 	catch (Exception $e) {
