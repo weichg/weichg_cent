@@ -34,8 +34,10 @@ if($_REQUEST['act'] == 'goods_syn') {
 	
 	try {
 		//获得子商城数据库IP
-		$sql = "SELECT shop_ip FROM " . $ecs->table('users') . " WHERE user_id=" . $_SESSION['user_id'];
-		$shop_ip = $db->getOne($sql);
+		$sql = "SELECT shop_url FROM " . $ecs->table('users') . " WHERE user_id=" . $_SESSION['user_id'];
+		$shop_url = $db->getOne($sql);
+		$shop_url = parse_url($shop_url);
+		$shop_url = $shop_url['host'];
 
 		//获得商品信息
 		$sql = "SELECT * FROM weic_goods WHERE goods_id = " . $goodsId;
@@ -107,12 +109,12 @@ if($_REQUEST['act'] == 'goods_syn') {
 		//POST同步信息给子商城
 		$zipFile = realpath($zipPath . $zipFileName);
 		$fields['zip'] = '@' . $zipFile;
-		$fields['checkSn'] = md5("10.162.48.225" . $shop_ip);
+		$fields['checkSn'] = md5("115.29.244.218" . $shop_url);
 		$fields['directory'] = $goods_img_directory;
 		$fields['data'] = urlencode($json->encode($goods));
 		
 		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL,"http://$shop_ip/index.php?route=product/product_syn");
+		curl_setopt($ch, CURLOPT_URL,"http://$shop_url/index.php?route=product/product_syn");
 		curl_setopt($ch, CURLOPT_POST, 1 );
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -123,8 +125,8 @@ if($_REQUEST['act'] == 'goods_syn') {
 		if (file_exists($zipFile)) {
 			@unlink($zipFile);
 		}
-		die($result);
 		
+		die($result);
 	}
 	catch (Exception $e) {
 		$result['error'] = 2;
